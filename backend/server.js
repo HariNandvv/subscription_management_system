@@ -2,6 +2,8 @@ const db = require("./config/db");
 const express = require("express");
 const cors = require("cors");
 const productRoutes = require("./routes/productRoutes");
+const planRoutes = require("./routes/planRoutes");
+const subscriptionRoutes = require("./routes/subscriptionRoutes");
 require("dotenv").config();
 
 const app = express();
@@ -16,6 +18,8 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 app.use("/api/products", productRoutes);
+app.use("/api/plans", planRoutes);
+app.use("/api/subscriptions", subscriptionRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
