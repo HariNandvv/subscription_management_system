@@ -16,6 +16,8 @@ export default function Sidebar() {
     { name: "Subscriptions", path: "/subscriptions", icon: Layers },
     { name: "Invoices", path: "/invoices", icon: FileText },
     { name: "Payments", path: "/payments", icon: CreditCard },
+    { name: "Plans", path: "/plans", icon: Package },
+    { name: "Discounts", path: "/discounts", icon: Tag },
   ];
 
   const customerLinks = [
@@ -23,6 +25,7 @@ export default function Sidebar() {
     { name: "My Subscriptions", path: "/my-subscriptions", icon: Layers },
     { name: "My Invoices", path: "/my-invoices", icon: FileText },
     { name: "My Payments", path: "/my-payments", icon: CreditCard },
+    { name: "Plans", path: "/plans", icon: Package },
   ];
 
   const links = isAdmin ? adminLinks : customerLinks;

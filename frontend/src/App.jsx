@@ -2,13 +2,18 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
-
+import Products from "./pages/Products";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Customers from "./pages/Customers";
 import CustomerDashboard from "./pages/CustomerDashboard";
 import Placeholder from "./pages/Placeholder";
+import Plans from "./pages/Plans";
+import Subscriptions from "./pages/Subscriptions";
+import Discounts from "./pages/Discounts";
+import Invoices from "./pages/Invoices";
+import Payments from "./pages/Payments";
 
 function ProtectedLayout() {
   const token = localStorage.getItem("token");
@@ -47,41 +52,37 @@ function ProtectedLayout() {
               isAdmin ? <Customers /> : <Navigate to="/dashboard" replace />
             }
           />
+          <Route
+            path="/plans"
+            element={
+              isAdmin ? <Plans /> : <Navigate to="/dashboard" replace />
+            }
+          />
+          <Route
+            path="/discounts"
+            element={isAdmin ? <Discounts /> : <Navigate to="/dashboard" replace />}
+          />
 
           <Route
             path="/products"
             element={
-              isAdmin
-                ? <Placeholder title="Products" />
-                : <Navigate to="/dashboard" replace />
+              isAdmin ? <Products /> : <Navigate to="/dashboard" replace />
             }
           />
 
           <Route
             path="/subscriptions"
-            element={
-              isAdmin
-                ? <Placeholder title="Subscriptions" />
-                : <Navigate to="/dashboard" replace />
-            }
+            element={isAdmin ? <Subscriptions /> : <Navigate to="/dashboard" replace />}
           />
 
           <Route
             path="/invoices"
-            element={
-              isAdmin
-                ? <Placeholder title="Invoices" />
-                : <Navigate to="/dashboard" replace />
-            }
+            element={isAdmin ? <Invoices /> : <Navigate to="/dashboard" replace />}
           />
 
           <Route
             path="/payments"
-            element={
-              isAdmin
-                ? <Placeholder title="Payments" />
-                : <Navigate to="/dashboard" replace />
-            }
+            element={isAdmin ? <Payments /> : <Navigate to="/dashboard" replace />}
           />
 
           {/* Customer-only pages */}
