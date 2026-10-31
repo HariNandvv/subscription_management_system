@@ -1,19 +1,26 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
-import Products from "./pages/Products";
+
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import Customers from "./pages/Customers";
 import CustomerDashboard from "./pages/CustomerDashboard";
-import Placeholder from "./pages/Placeholder";
+
+import Customers from "./pages/Customers";
+import Products from "./pages/Products";
 import Plans from "./pages/Plans";
 import Subscriptions from "./pages/Subscriptions";
 import Discounts from "./pages/Discounts";
 import Invoices from "./pages/Invoices";
 import Payments from "./pages/Payments";
+
+import MyInvoices from "./pages/MyInvoices";
+import MyPayments from "./pages/MyPayments";
+import Placeholder from "./pages/Placeholder";
+import MySubscriptions from "./pages/MySubscriptions";
 
 function ProtectedLayout() {
   const token = localStorage.getItem("token");
@@ -38,6 +45,7 @@ function ProtectedLayout() {
         <Navbar />
 
         <Routes>
+          {/* Dashboard */}
           <Route
             path="/dashboard"
             element={
@@ -48,31 +56,27 @@ function ProtectedLayout() {
           {/* Admin-only pages */}
           <Route
             path="/customers"
-            element={
-              isAdmin ? <Customers /> : <Navigate to="/dashboard" replace />
-            }
-          />
-          <Route
-            path="/plans"
-            element={
-              isAdmin ? <Plans /> : <Navigate to="/dashboard" replace />
-            }
-          />
-          <Route
-            path="/discounts"
-            element={isAdmin ? <Discounts /> : <Navigate to="/dashboard" replace />}
+            element={isAdmin ? <Customers /> : <Navigate to="/dashboard" replace />}
           />
 
           <Route
             path="/products"
-            element={
-              isAdmin ? <Products /> : <Navigate to="/dashboard" replace />
-            }
+            element={isAdmin ? <Products /> : <Navigate to="/dashboard" replace />}
+          />
+
+          <Route
+            path="/plans"
+            element={isAdmin ? <Plans /> : <Navigate to="/dashboard" replace />}
           />
 
           <Route
             path="/subscriptions"
             element={isAdmin ? <Subscriptions /> : <Navigate to="/dashboard" replace />}
+          />
+
+          <Route
+            path="/discounts"
+            element={isAdmin ? <Discounts /> : <Navigate to="/dashboard" replace />}
           />
 
           <Route
@@ -90,7 +94,7 @@ function ProtectedLayout() {
             path="/my-subscriptions"
             element={
               isCustomer
-                ? <Placeholder title="My Subscriptions" />
+                ? <MySubscriptions />
                 : <Navigate to="/dashboard" replace />
             }
           />
@@ -98,22 +102,22 @@ function ProtectedLayout() {
           <Route
             path="/my-invoices"
             element={
-              isCustomer
-                ? <Placeholder title="My Invoices" />
-                : <Navigate to="/dashboard" replace />
+              isCustomer ? <MyInvoices /> : <Navigate to="/dashboard" replace />
             }
           />
 
           <Route
             path="/my-payments"
             element={
-              isCustomer
-                ? <Placeholder title="My Payments" />
-                : <Navigate to="/dashboard" replace />
+              isCustomer ? <MyPayments /> : <Navigate to="/dashboard" replace />
             }
           />
 
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          {/* Unknown routes */}
+          <Route
+            path="*"
+            element={<Navigate to="/dashboard" replace />}
+          />
         </Routes>
       </div>
     </div>

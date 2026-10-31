@@ -1,7 +1,14 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, Users, Package, CreditCard,
-  FileText, Layers, LogOut
+  LayoutDashboard,
+  Users,
+  Package,
+  Repeat,
+  Layers,
+  FileText,
+  CreditCard,
+  LogOut,
+  Tag
 } from "lucide-react";
 
 export default function Sidebar() {

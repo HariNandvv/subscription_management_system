@@ -1,3 +1,4 @@
+
 const express = require("express");
 const router = express.Router();
 
@@ -7,8 +8,17 @@ const {
     createInvoice
 } = require("../controllers/invoiceController");
 
-router.get("/", getInvoices);
-router.get("/:id", getInvoiceById);
-router.post("/", createInvoice);
+const {
+    verifyToken,
+    checkRole
+} = require("../middleware/authMiddleware");
+
+// Admin and customer can view invoices.
+// Customers only see their own invoices.
+router.get("/", verifyToken, getInvoices);
+router.get("/:id", verifyToken, getInvoiceById);
+
+// Only admins can create invoices.
+router.post("/", verifyToken, checkRole("admin"), createInvoice);
 
 module.exports = router;

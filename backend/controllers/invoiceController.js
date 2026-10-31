@@ -1,32 +1,54 @@
+
 const db = require("../config/db");
 
-// Get all invoices
+// Get all invoices (Admin: all, Customer: own invoices)
 exports.getInvoices = async (req, res) => {
     try {
-        const [invoices] = await db.query(`
+        let query = `
             SELECT i.*, u.id AS customer_reference
             FROM invoices i
             LEFT JOIN users u ON i.customer_id = u.id
-            ORDER BY i.id DESC
-        `);
+        `;
+
+        const params = [];
+
+        if (req.user.role !== "admin") {
+            query += " WHERE i.customer_id = ?";
+            params.push(req.user.id);
+        }
+
+        query += " ORDER BY i.id DESC";
+
+        const [invoices] = await db.query(query, params);
 
         res.status(200).json(invoices);
+
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Failed to fetch invoices" });
+        res.status(500).json({
+            message: "Failed to fetch invoices"
+        });
     }
 };
+
 
 // Get invoice by ID with items
 exports.getInvoiceById = async (req, res) => {
     try {
-        const [invoices] = await db.query(
-            "SELECT * FROM invoices WHERE id = ?",
-            [req.params.id]
-        );
+        let query = "SELECT * FROM invoices WHERE id = ?";
+        const params = [req.params.id];
+
+        if (req.user.role !== "admin") {
+            query += " AND customer_id = ?";
+            params.push(req.user.id);
+        }
+
+        const [invoices] = await db.query(query, params);
 
         if (invoices.length === 0) {
-            return res.status(404).json({ message: "Invoice not found" });
+            return res.status(404).json({
+                message: "Invoice not found"
+            });
         }
 
         const [items] = await db.query(
@@ -34,19 +56,23 @@ exports.getInvoiceById = async (req, res) => {
             [req.params.id]
         );
 
-        res.json({
+        res.status(200).json({
             ...invoices[0],
             items
         });
+
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Failed to fetch invoice" });
+        res.status(500).json({
+            message: "Failed to fetch invoice"
+        });
     }
 };
 
-// Create invoice with invoice items
+
+// Create invoice with invoice items (Admin only through routes)
 exports.createInvoice = async (req, res) => {
-    const connection = await db.getConnection();
+    let connection;
 
     try {
         const {
@@ -75,9 +101,11 @@ exports.createInvoice = async (req, res) => {
             const unitPrice = Number(item.unit_price);
             const taxRate = Number(item.tax_rate || 0);
 
-            if (!Number.isInteger(quantity) || quantity < 1 ||
+            if (
+                !Number.isInteger(quantity) || quantity < 1 ||
                 !Number.isFinite(unitPrice) || unitPrice < 0 ||
-                !Number.isFinite(taxRate) || taxRate < 0) {
+                !Number.isFinite(taxRate) || taxRate < 0
+            ) {
                 return res.status(400).json({
                     message: "Each item must have valid quantity, unit price and tax rate"
                 });
@@ -89,9 +117,11 @@ exports.createInvoice = async (req, res) => {
         const tax = Number(tax_amount);
         const discount = Number(discount_amount);
 
-        if (!Number.isFinite(tax) || tax < 0 ||
+        if (
+            !Number.isFinite(tax) || tax < 0 ||
             !Number.isFinite(discount) || discount < 0 ||
-            discount > subtotal + tax) {
+            discount > subtotal + tax
+        ) {
             return res.status(400).json({
                 message: "Invalid tax or discount amount"
             });
@@ -99,7 +129,23 @@ exports.createInvoice = async (req, res) => {
 
         const total = subtotal + tax - discount;
 
+        connection = await db.getConnection();
+
         await connection.beginTransaction();
+
+        // Verify that the subscription belongs to the selected customer
+        const [subscriptions] = await connection.query(
+            "SELECT id FROM subscriptions WHERE id = ? AND customer_id = ?",
+            [subscription_id, customer_id]
+        );
+
+        if (subscriptions.length === 0) {
+            await connection.rollback();
+
+            return res.status(400).json({
+                message: "Subscription does not belong to the selected customer"
+            });
+        }
 
         const [invoiceResult] = await connection.query(
             `INSERT INTO invoices
@@ -126,7 +172,6 @@ exports.createInvoice = async (req, res) => {
             const quantity = Number(item.quantity);
             const unitPrice = Number(item.unit_price);
             const taxRate = Number(item.tax_rate || 0);
-
             const amount = quantity * unitPrice;
 
             await connection.query(
@@ -158,13 +203,19 @@ exports.createInvoice = async (req, res) => {
         });
 
     } catch (error) {
-        await connection.rollback();
+        if (connection) {
+            await connection.rollback();
+        }
+
         console.error(error);
 
         res.status(500).json({
             message: "Failed to create invoice"
         });
+
     } finally {
-        connection.release();
+        if (connection) {
+            connection.release();
+        }
     }
 };

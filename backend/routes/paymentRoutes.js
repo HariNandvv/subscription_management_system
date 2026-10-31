@@ -9,9 +9,15 @@ const {
     deletePayment
 } = require("../controllers/paymentController");
 
-router.get("/", getPayments);
-router.get("/:id", getPaymentById);
-router.post("/", createPayment);
-router.delete("/:id", deletePayment);
+const {
+    verifyToken,
+    checkRole
+} = require("../middleware/authMiddleware");
+
+router.get("/", verifyToken, getPayments);
+router.get("/:id", verifyToken, getPaymentById);
+
+router.post("/", verifyToken, checkRole("admin"), createPayment);
+router.delete("/:id", verifyToken, checkRole("admin"), deletePayment);
 
 module.exports = router;
